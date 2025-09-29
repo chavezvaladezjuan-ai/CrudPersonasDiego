@@ -1,0 +1,210 @@
+﻿@model IEnumerable<CrudPersonasDiego.Models.Persona>
+
+@{
+    ViewData["Title"] = "Mi primer CRUD";
+}
+
+<h1 class="mb-4">Mi primer CRUD</h1>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+        NUEVA PERSONA
+    </button>
+
+    <div class="d-flex gap-2">
+        <form asp-action="Index" method="get" class="d-flex search-box">
+            <input type="text" class="form-control" placeholder="Busqueda..." name="searchString" value="@ViewData["CurrentFilter"]" />
+            <button type="submit" class="btn btn-outline-secondary ms-2">Buscar</button>
+        </form>
+
+        <form asp-action="Index" method="get" class="d-flex">
+            <select class="form-select" name="filtroEstatus" onchange="this.form.submit()">
+                <option value="">TODOS</option>
+                <option value="ACTIVOS" selected="@(ViewData["CurrentStatusFilter"]?.ToString() == "ACTIVOS")">ACTIVOS</option>
+                <option value="INACTIVOS" selected="@(ViewData["CurrentStatusFilter"]?.ToString() == "INACTIVOS")">INACTIVOS</option>
+            </select>
+        </form>
+    </div>
+</div>
+
+<table class="table table-striped table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Direccion</th>
+            <th>Teléfono</th>
+            <th>Estatus</th>
+            <th>Opciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                <td>@item.NombreCompleto</td>
+                <td>@Html.DisplayFor(modelItem => item.Direccion)</td>
+                <td>@Html.DisplayFor(modelItem => item.Telefono)</td>
+                <td>
+                    @if (item.Estatus == 1)
+                    {
+                        <span class="badge bg-success">Activo</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Inactivo</span>
+                    }
+                </td>
+                <td>
+                    @if (item.Estatus == 1)
+                    {
+                        <!-- Botón Editar (Azul con ojo blanco) -->
+                        <button class="btn btn-primary-custom btn-action" data-bs-toggle="modal" data-bs-target="#editModal"
+                                data-id="@item.Id" data-nombres="@item.Nombres" data-apellidop="@item.ApellidoP"
+                                data-apellidom="@item.ApellidoM" data-direccion="@item.Direccion" data-telefono="@item.Telefono"
+                                title="Editar">
+                            <i class="bi bi-eye-fill"></i>
+                        </button>
+
+                        <!-- Botón Eliminar (Rojo con bote de basura blanco) -->
+                        <form asp-action="Delete" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="btn btn-danger-custom btn-action"
+                                    onclick="return confirm('¿Está seguro de desactivar este registro?')"
+                                    title="Eliminar/Desactivar">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <!-- Botón Activar (Verde con palomita blanca) -->
+                        <form asp-action="Activate" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="btn btn-success-custom btn-action" title="Activar">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Modal para crear nueva persona -->
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createModalLabel">Nuevo Registro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Create">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="Nombres" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="Nombres" name="Nombres" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ApellidoP" class="form-label">Apellido Paterno</label>
+                        <input type="text" class="form-control" id="ApellidoP" name="ApellidoP" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ApellidoM" class="form-label">Apellido Materno</label>
+                        <input type="text" class="form-control" id="ApellidoM" name="ApellidoM" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Direccion" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="Direccion" name="Direccion" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Telefono" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="Telefono" name="Telefono" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-close-custom" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-save-custom">
+                        <i class="bi bi-save"></i> Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar persona -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Editar Registro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Edit">
+                <input type="hidden" id="Edit_Id" name="Id" />
+                <input type="hidden" id="Edit_Estatus" name="Estatus" value="1" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="Edit_Nombres" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="Edit_Nombres" name="Nombres" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Edit_ApellidoP" class="form-label">Apellido Paterno</label>
+                        <input type="text" class="form-control" id="Edit_ApellidoP" name="ApellidoP" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Edit_ApellidoM" class="form-label">Apellido Materno</label>
+                        <input type="text" class="form-control" id="Edit_ApellidoM" name="ApellidoM" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Edit_Direccion" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="Edit_Direccion" name="Direccion" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Edit_Telefono" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="Edit_Telefono" name="Telefono" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-close-custom" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg"></i> Cerrar
+                    </button>
+                    <button type="submit" class="btn btn-save-custom">
+                        <i class="bi bi-save"></i> Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Script para cargar datos en el modal de edición
+        var editModal = document.getElementById('editModal')
+        editModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget
+            var id = button.getAttribute('data-id')
+            var nombres = button.getAttribute('data-nombres')
+            var apellidoP = button.getAttribute('data-apellidop')
+            var apellidoM = button.getAttribute('data-apellidom')
+            var direccion = button.getAttribute('data-direccion')
+            var telefono = button.getAttribute('data-telefono')
+
+            var modalTitle = editModal.querySelector('.modal-title')
+            modalTitle.textContent = 'Editar Registro: ' + id
+
+            editModal.querySelector('#Edit_Id').value = id
+            editModal.querySelector('#Edit_Nombres').value = nombres
+            editModal.querySelector('#Edit_ApellidoP').value = apellidoP
+            editModal.querySelector('#Edit_ApellidoM').value = apellidoM
+            editModal.querySelector('#Edit_Direccion').value = direccion
+            editModal.querySelector('#Edit_Telefono').value = telefono
+        })
+    </script>
+}

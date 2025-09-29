@@ -1,0 +1,47 @@
+﻿@model CrudPersonasDiego.Models.Persona
+
+@{
+    ViewData["Title"] = "Editar Persona";
+}
+
+<h2>Editar Persona</h2>
+
+<form asp-action="Edit">
+    <input type="hidden" asp-for="Id" />
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="Nombres" class="control-label"></label>
+                <input asp-for="Nombres" class="form-control" />
+                <span asp-validation-for="Nombres" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="ApellidoP" class="control-label"></label>
+                <input asp-for="ApellidoP" class="form-control" />
+                <span asp-validation-for="ApellidoP" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label asp-for="ApellidoM" class="control-label"></label>
+        <input asp-for="ApellidoM" class="form-control" />
+        <span asp-validation-for="ApellidoM" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Direccion" class="control-label"></label>
+        <input asp-for="Direccion" class="form-control" />
+        <span asp-validation-for="Direccion" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Telefono" class="control-label"></label>
+        <input asp-for="Telefono" class="form-control" />
+        <span asp-validation-for="Telefono" class="text-danger"></span>
+    </div>
+    <input type="hidden" asp-for="Estatus" />
+    <div class="form-group mt-3">
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
