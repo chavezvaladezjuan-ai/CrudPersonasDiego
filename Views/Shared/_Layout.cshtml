@@ -81,6 +81,31 @@
             .table-bordered td {
                 border: 1px solid #dee2e6;
             }
+
+        /* Estilos para paginación */
+        .pagination .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+        }
+
+        .pagination .page-link {
+            color: #0d6efd;
+            border: 1px solid #dee2e6;
+        }
+
+            .pagination .page-link:hover {
+                color: #0a58ca;
+                background-color: #e9ecef;
+                border-color: #dee2e6;
+            }
+
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
     </style>
 </head>
 <body>

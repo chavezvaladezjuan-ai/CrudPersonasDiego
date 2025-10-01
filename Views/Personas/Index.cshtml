@@ -1,4 +1,4 @@
-﻿@model IEnumerable<CrudPersonasDiego.Models.Persona>
+﻿@model CrudPersonasDiego.Models.PaginacionViewModel
 
 @{
     ViewData["Title"] = "Mi primer CRUD";
@@ -14,17 +14,40 @@
     <div class="d-flex gap-2">
         <form asp-action="Index" method="get" class="d-flex search-box">
             <input type="text" class="form-control" placeholder="Busqueda..." name="searchString" value="@ViewData["CurrentFilter"]" />
+            <input type="hidden" name="pagina" value="1" />
             <button type="submit" class="btn btn-outline-secondary ms-2">Buscar</button>
         </form>
 
         <form asp-action="Index" method="get" class="d-flex">
+            <input type="hidden" name="searchString" value="@ViewData["CurrentFilter"]" />
             <select class="form-select" name="filtroEstatus" onchange="this.form.submit()">
                 <option value="">TODOS</option>
-                <option value="ACTIVOS" selected="@(ViewData["CurrentStatusFilter"]?.ToString() == "ACTIVOS")">ACTIVOS</option>
-                <option value="INACTIVOS" selected="@(ViewData["CurrentStatusFilter"]?.ToString() == "INACTIVOS")">INACTIVOS</option>
+                <option value="Activos" selected='@(ViewData["CurrentStatusFilter"]?.ToString() == "Activos")'>Activos</option>
+                <option value="Inactivos" selected='@(ViewData["CurrentStatusFilter"]?.ToString() == "Inactivos")'>Inactivos</option>
+            </select>
+        </form>
+
+        <!-- Selector de registros por página -->
+        <form asp-action="Index" method="get" class="d-flex">
+            <input type="hidden" name="searchString" value="@ViewData["CurrentFilter"]" />
+            <input type="hidden" name="filtroEstatus" value="@ViewData["CurrentStatusFilter"]" />
+            <select class="form-select" name="registrosPorPagina" onchange="this.form.submit()" style="width: 120px;">
+                <option value="5" selected="@(ViewData["RegistrosPorPagina"]?.ToString() == "5")">5 por página</option>
+                <option value="10" selected="@(ViewData["RegistrosPorPagina"]?.ToString() == "10")">10 por página</option>
+                <option value="20" selected="@(ViewData["RegistrosPorPagina"]?.ToString() == "20")">20 por página</option>
+                <option value="50" selected="@(ViewData["RegistrosPorPagina"]?.ToString() == "50")">50 por página</option>
             </select>
         </form>
     </div>
+</div>
+
+<!-- Información de paginación -->
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <p class="text-muted mb-0">
+        Mostrando <strong>@((Model.PaginaActual - 1) * Model.RegistrosPorPagina + 1)</strong>
+        a <strong>@Math.Min(Model.PaginaActual * Model.RegistrosPorPagina, Model.TotalRegistros)</strong>
+        de <strong>@Model.TotalRegistros</strong> registros
+    </p>
 </div>
 
 <table class="table table-striped table-bordered">
@@ -39,7 +62,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Personas)
         {
             <tr>
                 <td>@Html.DisplayFor(modelItem => item.Id)</td>
@@ -93,6 +116,53 @@
     </tbody>
 </table>
 
+<!-- Paginación -->
+@if (Model.TotalPaginas > 0)
+{
+    <nav aria-label="Paginación">
+        <ul class="pagination justify-content-center">
+            <!-- Botón Primera Página -->
+            <li class="page-item @(Model.PaginaActual == 1 ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { searchString = Model.FiltroActual, filtroEstatus = Model.FiltroEstatus, pagina = 1, registrosPorPagina = Model.RegistrosPorPagina })">
+                    <i class="bi bi-chevron-double-left"></i>
+                </a>
+            </li>
+
+            <!-- Botón Página Anterior -->
+            <li class="page-item @(Model.PaginaActual == 1 ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { searchString = Model.FiltroActual, filtroEstatus = Model.FiltroEstatus, pagina = Model.PaginaActual - 1, registrosPorPagina = Model.RegistrosPorPagina })">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+
+            <!-- Números de Página -->
+            @for (int i = Math.Max(1, Model.PaginaActual - 2); i <= Math.Min(Model.TotalPaginas, Model.PaginaActual + 2); i++)
+            {
+                <li class="page-item @(i == Model.PaginaActual ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Index", new { searchString = Model.FiltroActual, filtroEstatus = Model.FiltroEstatus, pagina = i, registrosPorPagina = Model.RegistrosPorPagina })">
+                        @i
+                    </a>
+                </li>
+            }
+
+            <!-- Botón Página Siguiente -->
+            <li class="page-item @(Model.PaginaActual == Model.TotalPaginas ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { searchString = Model.FiltroActual, filtroEstatus = Model.FiltroEstatus, pagina = Model.PaginaActual + 1, registrosPorPagina = Model.RegistrosPorPagina })">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+
+            <!-- Botón Última Página -->
+            <li class="page-item @(Model.PaginaActual == Model.TotalPaginas ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { searchString = Model.FiltroActual, filtroEstatus = Model.FiltroEstatus, pagina = Model.TotalPaginas, registrosPorPagina = Model.RegistrosPorPagina })">
+                    <i class="bi bi-chevron-double-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+}
+
+<!-- Los modales permanecen igual -->
 <!-- Modal para crear nueva persona -->
 <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
     <div class="modal-dialog">

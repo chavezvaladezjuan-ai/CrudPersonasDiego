@@ -15,7 +15,8 @@ namespace CrudPersonasDiego.Controllers
         }
 
         // GET: Personas
-        public async Task<IActionResult> Index(string searchString, string filtroEstatus)
+        // GET: Personas
+        public async Task<IActionResult> Index(string searchString, string filtroEstatus, int pagina = 1, int registrosPorPagina = 10)
         {
             var personas = from p in _context.PersonasDiegoN
                            select p;
@@ -32,20 +33,24 @@ namespace CrudPersonasDiego.Controllers
             // Aplicar filtro de estatus
             if (!string.IsNullOrEmpty(filtroEstatus))
             {
-                if (filtroEstatus == "ACTIVOS")
+                if (filtroEstatus == "Activos")
                 {
                     personas = personas.Where(p => p.Estatus == 1);
                 }
-                else if (filtroEstatus == "INACTIVOS")
+                else if (filtroEstatus == "Inactivos")
                 {
                     personas = personas.Where(p => p.Estatus == 0);
                 }
             }
 
+            // Aplicar paginación
+            var modeloPaginado = personas.ToPagedList(pagina, registrosPorPagina, searchString, filtroEstatus);
+
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentStatusFilter"] = filtroEstatus;
+            ViewData["RegistrosPorPagina"] = registrosPorPagina;
 
-            return View(await personas.OrderBy(p => p.Id).ToListAsync());
+            return View(modeloPaginado);
         }
 
         // GET: Personas/Create
